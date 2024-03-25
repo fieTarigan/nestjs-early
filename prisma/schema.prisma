@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Article {
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  description String?
+  body        String
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      User?    @relation(fields: [authorId], references: [id])
+  authorId    Int?
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  name        String?
+  email       String        @unique
+  password    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  articles    Article[]
+  UserContent UserContent[]
+}
+
+model ContentType {
+  id       Int       @id @default(autoincrement())
+  name     String?
+  contents Content[]
+}
+
+model Content {
+  id            Int           @id @default(autoincrement())
+  contentType   ContentType   @relation(fields: [contentTypeId], references: [id])
+  contentTypeId Int
+  name          String?
+  previewUrl    String?
+  fullUrl       String?
+  price         Int
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  question      Question[]
+  UserContent   UserContent[]
+}
+
+model Question {
+  id          Int      @id @default(autoincrement())
+  content     Content? @relation(fields: [contentId], references: [id])
+  contentId   Int?
+  questionary String
+  answer      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model UserContent {
+  id        Int      @id @default(autoincrement())
+  content   Content  @relation(fields: [contentId], references: [id])
+  contentId Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  isPaid    Boolean
+  orderId   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
